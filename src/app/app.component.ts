@@ -1,32 +1,64 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { SubForm2Component } from './components/sub-form2/sub-form2.component';
 
 @Component({
   selector: 'app-root',
   template: `
-    <!--The content below is only a placeholder and can be replaced.-->
-    <div style="text-align:center" class="content">
-      <h1>
-        Welcome to {{title}}!
-      </h1>
-      <span style="display: block">{{ title }} app is running!</span>
-      <img width="300" alt="Angular Logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTAgMjUwIj4KICAgIDxwYXRoIGZpbGw9IiNERDAwMzEiIGQ9Ik0xMjUgMzBMMzEuOSA2My4ybDE0LjIgMTIzLjFMMTI1IDIzMGw3OC45LTQzLjcgMTQuMi0xMjMuMXoiIC8+CiAgICA8cGF0aCBmaWxsPSIjQzMwMDJGIiBkPSJNMTI1IDMwdjIyLjItLjFWMjMwbDc4LjktNDMuNyAxNC4yLTEyMy4xTDEyNSAzMHoiIC8+CiAgICA8cGF0aCAgZmlsbD0iI0ZGRkZGRiIgZD0iTTEyNSA1Mi4xTDY2LjggMTgyLjZoMjEuN2wxMS43LTI5LjJoNDkuNGwxMS43IDI5LjJIMTgzTDEyNSA1Mi4xem0xNyA4My4zaC0zNGwxNy00MC45IDE3IDQwLjl6IiAvPgogIDwvc3ZnPg==">
+  <form [formGroup]="heroForm">
+    <div>
+      <label>Hero</label>
+      <div class="col">
+        <input
+          formControlName="heroName"
+          type="text"
+          nbInput
+          placeholder="Hero name"
+        />
+        <input formControlName="aka" type="text" nbInput placeholder="AKA" />
+      </div>
     </div>
-    <h2>Here are some links to help you start: </h2>
-    <ul>
-      <li>
-        <h2><a target="_blank" rel="noopener" href="https://angular.io/tutorial">Tour of Heroes</a></h2>
-      </li>
-      <li>
-        <h2><a target="_blank" rel="noopener" href="https://angular.io/cli">CLI Documentation</a></h2>
-      </li>
-      <li>
-        <h2><a target="_blank" rel="noopener" href="https://blog.angular.io/">Angular blog</a></h2>
-      </li>
-    </ul>
-    <router-outlet></router-outlet>
+
+    <div>
+      <label>Super Power</label>
+      <div class="col">
+        <app-sub-form2></app-sub-form2>
+      </div>
+    </div>
+
+    <div>
+      <label>Hobbies</label>
+      <div class="col">
+        <app-sub-form1
+          [parentForm]="heroForm"
+          [formGroup]="$any(heroForm.get('subForm1'))"
+        ></app-sub-form1>
+      </div>
+    </div>
+    <button (click)="logFormData()" nbButton status="primary">Submit</button>
+  </form>
   `,
   styles: []
 })
-export class AppComponent {
-  title = 'reusable-form';
+export class AppComponent implements OnInit {
+  @ViewChild(SubForm2Component, { static: true }) public subForm2!: SubForm2Component;
+
+  public heroForm!: FormGroup;
+  constructor(private formBuilder: FormBuilder) {
+  }
+
+  public ngOnInit(): void {
+    this.heroForm = this.formBuilder.group({
+      heroName: ['', Validators.required],
+      aka: ['', Validators.required],
+      powers: this.subForm2.createFormGroup(),
+      subForm1: this.formBuilder.group({
+        favoriteHobby: ['', Validators.required]
+      })
+    })
+  }
+
+  public logFormData(): void {
+    console.log(this.heroForm.value);
+  }
 }
